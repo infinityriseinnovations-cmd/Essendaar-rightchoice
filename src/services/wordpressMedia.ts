@@ -120,7 +120,7 @@ export async function uploadImageToWordPressMedia(
   if (!username || !rawPassword) {
     return {
       success: false,
-      error: 'WordPress Username and Application Password are required. Click "Configure WordPress Credentials" to set them up.'
+      error: 'WordPress Username and Application Password are required. Click "Connection Settings" to configure them.'
     };
   }
 
@@ -129,87 +129,103 @@ export async function uploadImageToWordPressMedia(
     ? config.wpBaseUrl.trim().replace(/\/+$/, '') 
     : (typeof window !== 'undefined' ? window.location.origin : '');
 
-  const endpoint = `${baseUrl}/wp-json/wp/v2/media`;
+  // Endpoints to attempt:
+  // 1. Query parameter REST route: index.php?rest_route=/wp/v2/media (bypasses Apache/cPanel SPA rewrites and works with any permalink settings)
+  // 2. Pretty permalink: /wp-json/wp/v2/media
+  const endpointsToTry = [
+    `${baseUrl}/index.php?rest_route=/wp/v2/media`,
+    `${baseUrl}/wp-json/wp/v2/media`
+  ];
 
-  try {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('title', cleanTitle);
+  const authHeader = 'Basic ' + btoa(`${username}:${rawPassword}`);
+  let lastError = '';
 
-    const authHeader = 'Basic ' + btoa(`${username}:${rawPassword}`);
-
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Authorization': authHeader,
-      },
-      body: formData
-    });
-
-    const contentType = response.headers.get('content-type') || '';
-    const rawText = await response.text();
-
-    // Check if the response is an HTML document instead of JSON
-    if (rawText.trim().startsWith('<') || !contentType.includes('application/json')) {
-      return {
-        success: false,
-        error: `WordPress REST API at "${endpoint}" returned a web page (HTML) instead of JSON. This usually occurs when:
-1. WordPress is not installed at "${baseUrl}" or domain DNS is still propagating.
-2. Pretty Permalinks are not enabled in WP Admin > Settings > Permalinks.
-3. Your site redirects unauthenticated REST requests to wp-login.php.`
-      };
-    }
-
-    let data: any;
+  for (const endpoint of endpointsToTry) {
     try {
-      data = JSON.parse(rawText);
-    } catch {
-      return {
-        success: false,
-        error: 'Invalid response received from WordPress REST API (could not parse JSON).'
-      };
-    }
+      // First attempt: Standard WordPress REST API raw binary upload with Content-Disposition
+      let response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Authorization': authHeader,
+          'Content-Disposition': `attachment; filename="${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}"`,
+          'Content-Type': file.type || 'image/jpeg',
+          'Accept': 'application/json'
+        },
+        body: file
+      });
 
-    if (!response.ok) {
-      let errorMsg = `HTTP ${response.status}: ${response.statusText}`;
-      if (data && data.message) {
-        errorMsg = data.message.replace(/<[^>]+>/g, '');
+      let contentType = response.headers.get('content-type') || '';
+      let rawText = await response.text();
+
+      // If this endpoint returned an HTML web page (e.g. index.html fallback), skip to next endpoint
+      if (rawText.trim().startsWith('<') || (!contentType.includes('application/json') && !rawText.trim().startsWith('{'))) {
+        console.warn(`[WordPress Upload] Endpoint ${endpoint} returned HTML, trying fallback endpoint...`);
+        continue;
       }
 
-      if (response.status === 401 || response.status === 403) {
-        errorMsg = 'Authentication Failed: Please check that your WordPress Username and Application Password are correct and have editor/admin permissions.';
-      } else if (response.status === 404) {
-        errorMsg = `WordPress REST API endpoint not found at ${endpoint}.`;
+      // If binary method resulted in 400 or 415, retry with multipart FormData
+      if (response.status === 400 || response.status === 415) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('title', cleanTitle);
+
+        response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Authorization': authHeader,
+            'Accept': 'application/json'
+          },
+          body: formData
+        });
+
+        contentType = response.headers.get('content-type') || '';
+        rawText = await response.text();
       }
 
-      return {
-        success: false,
-        error: errorMsg
-      };
+      let data: any;
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        lastError = 'Invalid response received from WordPress REST API (non-JSON).';
+        continue;
+      }
+
+      if (!response.ok) {
+        let errorMsg = `HTTP ${response.status}: ${response.statusText}`;
+        if (data && data.message) {
+          errorMsg = data.message.replace(/<[^>]+>/g, '');
+        }
+
+        if (response.status === 401 || response.status === 403) {
+          return {
+            success: false,
+            error: `WordPress Authentication Failed (${response.status}): ${errorMsg}. Please verify your WordPress username and Application Password in Connection Settings.`
+          };
+        }
+
+        lastError = errorMsg;
+        continue;
+      }
+
+      const uploadedUrl = data.source_url || data.guid?.rendered || '';
+      if (uploadedUrl) {
+        return {
+          success: true,
+          url: uploadedUrl,
+          id: data.id,
+          title: data.title?.rendered || cleanTitle,
+          source: 'wordpress'
+        };
+      }
+    } catch (err: any) {
+      lastError = err?.message || 'Network error connecting to WordPress REST API.';
     }
-
-    const uploadedUrl = data.source_url || data.guid?.rendered || '';
-
-    if (!uploadedUrl) {
-      return {
-        success: false,
-        error: 'Upload succeeded, but WordPress did not return a valid source_url.'
-      };
-    }
-
-    return {
-      success: true,
-      url: uploadedUrl,
-      id: data.id,
-      title: data.title?.rendered || cleanTitle,
-      source: 'wordpress'
-    };
-  } catch (err: any) {
-    return {
-      success: false,
-      error: err?.message || 'Network error connecting to WordPress REST API.'
-    };
   }
+
+  return {
+    success: false,
+    error: lastError || `WordPress REST API at "${baseUrl}" returned a web page (HTML) instead of JSON. Ensure WordPress is active at this URL and your Application Password has Editor or Admin rights.`
+  };
 }
 
 /**
@@ -260,54 +276,57 @@ export async function fetchWordPressMediaLibrary(
     ? config.wpBaseUrl.trim().replace(/\/+$/, '') 
     : (typeof window !== 'undefined' ? window.location.origin : '');
 
-  const endpoint = `${baseUrl}/wp-json/wp/v2/media?per_page=${perPage}&page=${page}&media_type=image`;
+  const endpoints = [
+    `${baseUrl}/index.php?rest_route=/wp/v2/media&per_page=${perPage}&page=${page}&media_type=image`,
+    `${baseUrl}/wp-json/wp/v2/media?per_page=${perPage}&page=${page}&media_type=image`
+  ];
 
-  try {
-    const headers: Record<string, string> = { 'Accept': 'application/json' };
-    if (config.username && config.appPassword) {
-      const cleanPass = config.appPassword.replace(/\s+/g, '');
-      headers['Authorization'] = 'Basic ' + btoa(`${config.username.trim()}:${cleanPass}`);
-    }
-
-    const response = await fetch(endpoint, { headers });
-    const contentType = response.headers.get('content-type') || '';
-    const rawText = await response.text();
-
-    if (rawText.trim().startsWith('<') || !contentType.includes('application/json')) {
-      return {
-        success: false,
-        error: `Could not fetch WordPress media (server at ${baseUrl} returned a web page instead of REST API JSON).`
-      };
-    }
-
-    const data = JSON.parse(rawText);
-    if (!response.ok || !Array.isArray(data)) {
-      return {
-        success: false,
-        error: `Could not fetch media from WordPress (HTTP ${response.status})`
-      };
-    }
-
-    const totalPages = parseInt(response.headers.get('X-WP-TotalPages') || '1', 10);
-    const items: WpMediaItem[] = data.map((item: any) => ({
-      id: item.id,
-      title: item.title?.rendered || item.slug || `Media #${item.id}`,
-      source_url: item.source_url || item.guid?.rendered,
-      thumbnail_url: item.media_details?.sizes?.medium?.source_url || item.media_details?.sizes?.thumbnail?.source_url || item.source_url,
-      date: item.date || '',
-      mime_type: item.mime_type || 'image/jpeg'
-    })).filter(i => !!i.source_url);
-
-    return {
-      success: true,
-      items,
-      totalPages,
-      source: 'wordpress'
-    };
-  } catch (err: any) {
-    return {
-      success: false,
-      error: err?.message || 'Network connection failed'
-    };
+  const headers: Record<string, string> = { 'Accept': 'application/json' };
+  if (config.username && config.appPassword) {
+    const cleanPass = config.appPassword.replace(/\s+/g, '');
+    headers['Authorization'] = 'Basic ' + btoa(`${config.username.trim()}:${cleanPass}`);
   }
+
+  let lastError = '';
+
+  for (const endpoint of endpoints) {
+    try {
+      const response = await fetch(endpoint, { headers });
+      const contentType = response.headers.get('content-type') || '';
+      const rawText = await response.text();
+
+      if (rawText.trim().startsWith('<') || (!contentType.includes('application/json') && !rawText.trim().startsWith('['))) {
+        continue;
+      }
+
+      const data = JSON.parse(rawText);
+      if (response.ok && Array.isArray(data)) {
+        const totalPages = parseInt(response.headers.get('X-WP-TotalPages') || '1', 10);
+        const items: WpMediaItem[] = data.map((item: any) => ({
+          id: item.id,
+          title: item.title?.rendered || item.slug || `Media #${item.id}`,
+          source_url: item.source_url || item.guid?.rendered,
+          thumbnail_url: item.media_details?.sizes?.medium?.source_url || item.media_details?.sizes?.thumbnail?.source_url || item.source_url,
+          date: item.date || '',
+          mime_type: item.mime_type || 'image/jpeg'
+        })).filter(i => !!i.source_url);
+
+        return {
+          success: true,
+          items,
+          totalPages,
+          source: 'wordpress'
+        };
+      } else if (!response.ok) {
+        lastError = data?.message?.replace(/<[^>]+>/g, '') || `HTTP ${response.status}`;
+      }
+    } catch (err: any) {
+      lastError = err?.message || 'Network connection failed';
+    }
+  }
+
+  return {
+    success: false,
+    error: lastError || `Could not fetch WordPress media from ${baseUrl}.`
+  };
 }

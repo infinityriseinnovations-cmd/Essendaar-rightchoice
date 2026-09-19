@@ -174,7 +174,7 @@ export const WordPressMediaModal: React.FC<WordPressMediaModalProps> = ({
                 </span>
               </h3>
               <p className="text-[11px] text-stone-300">
-                Direct integration with essendaar.com WordPress REST API
+                Direct integration with {config.wpBaseUrl ? config.wpBaseUrl.replace(/^https?:\/\//, '').replace(/\/+$/, '') : 'WordPress'} Media REST API
               </p>
             </div>
           </div>
@@ -515,7 +515,7 @@ export const WordPressMediaModal: React.FC<WordPressMediaModalProps> = ({
                 <div>
                   <h5 className="font-bold">WordPress Connection Guide</h5>
                   <p className="text-[11px] text-sky-800 mt-1 leading-relaxed">
-                    When deployed on your live cPanel server at <strong>essendaar.com</strong>, leave Site URL blank for automatic uploads into WordPress <code>/wp-content/uploads/</code>. In this preview environment, images are automatically staged so product photos work immediately even if WordPress domain DNS is not yet live.
+                    Connects directly to your WordPress REST API. Enter your site URL (e.g. <code>https://rightchoiceindia.com</code>) along with an Application Password generated under <strong>WordPress Admin &gt; Users &gt; Profile</strong>. If hosted on the same domain as WordPress, you can leave Site URL blank.
                   </p>
                 </div>
               </div>
@@ -523,16 +523,16 @@ export const WordPressMediaModal: React.FC<WordPressMediaModalProps> = ({
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
                   <Globe className="w-3.5 h-3.5 text-slate-400" />
-                  <span>WordPress Site URL (Optional for same domain)</span>
+                  <span>WordPress Site URL</span>
                 </label>
                 <input
                   type="text"
-                  placeholder="https://essendaar.com (or leave blank for current domain)"
+                  placeholder="https://rightchoiceindia.com (or leave blank for current domain)"
                   value={config.wpBaseUrl}
                   onChange={(e) => setConfig({ ...config, wpBaseUrl: e.target.value })}
                   className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-mono focus:outline-none focus:border-[#0073aa]"
                 />
-                <p className="text-[10px] text-slate-400 mt-1">If WordPress is in a folder like <code>/wp</code>, enter <code>https://essendaar.com/wp</code>.</p>
+                <p className="text-[10px] text-slate-400 mt-1">Both direct REST API (<code>index.php?rest_route=/wp/v2/media</code>) and pretty permalinks (<code>/wp-json/</code>) are supported automatically.</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

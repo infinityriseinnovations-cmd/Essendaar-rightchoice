@@ -9,6 +9,18 @@ DirectoryIndex index.html index.php
 RewriteEngine On
 RewriteBase /
 
+# Ensure Authorization Header is passed to PHP (Apache strips this by default for Basic Auth & Application Passwords)
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Forward WordPress REST API requests directly to index.php
+RewriteRule ^wp-json/(.*) index.php?rest_route=/$1 [L,QSA]
+RewriteRule ^wp-json$ index.php?rest_route=/ [L,QSA]
+
+# Allow direct access to WordPress admin, login, uploads, and php files
+RewriteCond %{REQUEST_URI} ^/wp-(admin|login|content|includes) [NC,OR]
+RewriteCond %{REQUEST_URI} \.php$ [NC]
+RewriteRule ^ - [L]
+
 # 3. Safe HTTPS Redirection (Safe for cPanel multi-domain & Cloudflare/LiteSpeed SSL proxies)
 RewriteCond %{HTTPS} !on
 RewriteCond %{HTTP:X-Forwarded-Proto} !https

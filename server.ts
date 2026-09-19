@@ -322,11 +322,13 @@ async function startServer() {
         const cleanPassword = appPassword.replace(/\s+/g, '');
         const authHeader = 'Basic ' + Buffer.from(`${username.trim()}:${cleanPassword}`).toString('base64');
 
-        // Endpoints to attempt: pretty permalinks first, then query permalinks
+        // Endpoints to attempt: query permalinks first (bypasses Apache SPA rewrites), then pretty permalinks
         const endpointsToTry = [
-          `${cleanWpUrl}/wp-json/wp/v2/media`,
-          `${cleanWpUrl}/index.php?rest_route=/wp/v2/media`
+          `${cleanWpUrl}/index.php?rest_route=/wp/v2/media`,
+          `${cleanWpUrl}/wp-json/wp/v2/media`
         ];
+
+        let lastWpError = '';
 
         for (const wpEndpoint of endpointsToTry) {
           try {
@@ -345,7 +347,7 @@ async function startServer() {
             const wpText = await wpRes.text();
 
             // If response is valid JSON
-            if (contentType.includes('application/json') || (!wpText.trim().startsWith('<') && wpText.trim().startsWith('{'))) {
+            if (contentType.includes('application/json') || (!wpText.trim().startsWith('<') && (wpText.trim().startsWith('{') || wpText.trim().startsWith('[')))) {
               try {
                 const wpJson = JSON.parse(wpText);
                 if (wpRes.ok && (wpJson.source_url || wpJson.guid?.rendered)) {
@@ -357,6 +359,9 @@ async function startServer() {
                     title: wpJson.title?.rendered || cleanTitle,
                     source: 'wordpress'
                   });
+                } else if (!wpRes.ok) {
+                  lastWpError = wpJson.message ? wpJson.message.replace(/<[^>]+>/g, '') : `HTTP ${wpRes.status}`;
+                  console.warn(`[WP Media Upload Response Error]:`, lastWpError);
                 }
               } catch {
                 // fall through to next endpoint or local staging
@@ -408,8 +413,8 @@ async function startServer() {
         }
 
         const endpoints = [
-          `${cleanWpUrl}/wp-json/wp/v2/media?per_page=${perPage}&page=${page}&media_type=image`,
-          `${cleanWpUrl}/index.php?rest_route=/wp/v2/media&per_page=${perPage}&page=${page}&media_type=image`
+          `${cleanWpUrl}/index.php?rest_route=/wp/v2/media&per_page=${perPage}&page=${page}&media_type=image`,
+          `${cleanWpUrl}/wp-json/wp/v2/media?per_page=${perPage}&page=${page}&media_type=image`
         ];
 
         for (const ep of endpoints) {
