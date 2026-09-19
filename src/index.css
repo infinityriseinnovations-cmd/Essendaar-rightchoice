@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-headline: 'Plus Jakarta Sans', system-ui, sans-serif;
+
+  --color-primary: #00355f;
+  --color-primary-container: #0f4c81;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #8ebdf9;
+  --color-primary-fixed: #d2e4ff;
+  --color-primary-fixed-dim: #a0c9ff;
+
+  --color-secondary: #006e2d;
+  --color-secondary-container: #7cf994;
+  --color-secondary-fixed: #7ffc97;
+  --color-secondary-fixed-dim: #62df7d;
+  --color-on-secondary: #ffffff;
+
+  --color-tertiary: #003756;
+  --color-tertiary-container: #004e78;
+  --color-tertiary-fixed: #cce5ff;
+  --color-tertiary-fixed-dim: #93ccff;
+  --color-on-tertiary: #ffffff;
+
+  --color-trust-navy-dark: #0A2540;
+  --color-trust-navy-light: #EBF3FA;
+  --color-eco-green-dark: #14532D;
+  --color-eco-green-light: #F0FDF4;
+  
+  --color-brand-amber: #F59E0B;
+  --color-brand-amber-light: #FEF3C7;
+  --color-brand-ruby: #DC2626;
+  --color-brand-ruby-light: #FEF2F2;
+
+  --color-surface: #f8f9ff;
+  --color-surface-page: #F8FAFC;
+  --color-surface-card: #FFFFFF;
+  --color-surface-subtle: #F1F5F9;
+  --color-surface-bright: #f8f9ff;
+  --color-surface-dim: #cbdbf5;
+
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #eff4ff;
+  --color-surface-container: #e5eeff;
+  --color-surface-container-high: #dce9ff;
+  --color-surface-container-highest: #d3e4fe;
+
+  --color-border-subtle: #E2E8F0;
+  --color-border-strong: #CBD5E1;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-outline: #727780;
+  --color-outline-variant: #c2c7d1;
+
+  --color-on-surface: #0b1c30;
+  --color-on-surface-variant: #42474f;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f8f9ff;
+  color: #0b1c30;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6, .font-headline {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Material Symbols font support */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Print Specific Rules for GST Tax Invoices and Receipts */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Hide navigation, headers, footers, admin bars, and modals backdrop */
+  header, footer, nav, .no-print, [role="dialog"] > div:first-child {
+    display: none !important;
+  }
+
+  .print-exact {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

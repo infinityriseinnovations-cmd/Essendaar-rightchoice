@@ -1,0 +1,72 @@
+/*
+Theme Name: Essendaar Suppliers & Facility Care
+Theme URI: https://github.com/infinityriseinnovations-cmd/Right-Choice2
+Author: Essendaar Tech
+Author URI: https://essendaar.com
+Description: Official Elementor & WooCommerce ready WordPress theme for Essendaar Suppliers & Facility Care. Built with native WordPress hooks, full Elementor page builder compatibility, dynamic menu support, and WooCommerce storefront.
+Version: 1.2.0
+Requires at least: 5.8
+Tested up to: 6.7
+Requires PHP: 7.4
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: essendaar
+Tags: e-commerce, woocommerce, elementor, responsive-layout, custom-menu, featured-images, full-width-template
+*/
+
+:root {
+  --essendaar-navy: #0A2540;
+  --essendaar-blue: #00355f;
+  --essendaar-green: #006e2d;
+  --essendaar-bg: #f8f9ff;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #0A2540;
+  background-color: #f8f9ff;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Ensure WooCommerce components integrate cleanly */
+.woocommerce ul.products li.product,
+.woocommerce-page ul.products li.product {
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.woocommerce ul.products li.product:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+}
+
+.woocommerce a.button.add_to_cart_button,
+.woocommerce button.button.alt,
+.woocommerce input.button.alt {
+  background-color: var(--essendaar-navy) !important;
+  color: #ffffff !important;
+  border-radius: 0.75rem !important;
+  padding: 0.6rem 1.2rem !important;
+  font-weight: 700 !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.woocommerce a.button.add_to_cart_button:hover,
+.woocommerce button.button.alt:hover,
+.woocommerce input.button.alt:hover {
+  background-color: var(--essendaar-blue) !important;
+}
+
+/* Hide admin bar if user wants it hidden on frontend while staying logged in */
+.essendaar-hide-admin-bar #wpadminbar {
+  display: none !important;
+}
+html.essendaar-hide-admin-bar {
+  margin-top: 0 !important;
+}

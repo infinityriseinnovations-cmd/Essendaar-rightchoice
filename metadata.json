@@ -1,0 +1,8 @@
+{
+  "name": "WooCommerce Store & Mobile Checkout",
+  "description": "Essendaar Suppliers & Facility Care standalone full-stack storefront with integrated operations admin dashboard, catalog management, B2B quotation desk, and GST invoicing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
