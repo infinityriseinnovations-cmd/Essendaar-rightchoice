@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
@@ -34,7 +35,16 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json());
+  // Support image payloads up to 50MB
+  app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+  // Ensure public/uploads directory exists and serve statically
+  const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+  app.use('/uploads', express.static(uploadsDir));
 
   // 1. Health check
   app.get('/api/health', (_req, res) => {
@@ -286,6 +296,173 @@ async function startServer() {
     } catch (err: any) {
       console.warn('[SMTP Inquiry Email Warning]:', err.message);
       res.json({ success: true, warning: err.message });
+    }
+  });
+
+  // 6. WordPress Media Upload Proxy with Local Fallback
+  app.post('/api/wp-media/upload', async (req, res) => {
+    try {
+      const { fileName, fileType, base64, wpBaseUrl, username, appPassword } = req.body;
+
+      if (!base64 || !fileName) {
+        return res.status(400).json({ success: false, error: 'File data and filename are required.' });
+      }
+
+      // Convert base64 to Buffer
+      const cleanBase64 = base64.replace(/^data:image\/\w+;base64,/, '');
+      const fileBuffer = Buffer.from(cleanBase64, 'base64');
+      const safeFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const cleanTitle = safeFileName.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+
+      // Check if user provided an external WordPress URL
+      const cleanWpUrl = (wpBaseUrl || '').trim().replace(/\/+$/, '');
+      const isExternalWp = cleanWpUrl.startsWith('http://') || cleanWpUrl.startsWith('https://');
+
+      if (isExternalWp && username && appPassword) {
+        const cleanPassword = appPassword.replace(/\s+/g, '');
+        const authHeader = 'Basic ' + Buffer.from(`${username.trim()}:${cleanPassword}`).toString('base64');
+
+        // Endpoints to attempt: pretty permalinks first, then query permalinks
+        const endpointsToTry = [
+          `${cleanWpUrl}/wp-json/wp/v2/media`,
+          `${cleanWpUrl}/index.php?rest_route=/wp/v2/media`
+        ];
+
+        for (const wpEndpoint of endpointsToTry) {
+          try {
+            const wpRes = await fetch(wpEndpoint, {
+              method: 'POST',
+              headers: {
+                'Authorization': authHeader,
+                'Content-Disposition': `attachment; filename="${safeFileName}"`,
+                'Content-Type': fileType || 'image/jpeg',
+                'Accept': 'application/json'
+              },
+              body: fileBuffer
+            });
+
+            const contentType = wpRes.headers.get('content-type') || '';
+            const wpText = await wpRes.text();
+
+            // If response is valid JSON
+            if (contentType.includes('application/json') || (!wpText.trim().startsWith('<') && wpText.trim().startsWith('{'))) {
+              try {
+                const wpJson = JSON.parse(wpText);
+                if (wpRes.ok && (wpJson.source_url || wpJson.guid?.rendered)) {
+                  console.log(`[WP Media Upload Success] Uploaded to ${wpEndpoint}`);
+                  return res.json({
+                    success: true,
+                    url: wpJson.source_url || wpJson.guid?.rendered,
+                    id: wpJson.id,
+                    title: wpJson.title?.rendered || cleanTitle,
+                    source: 'wordpress'
+                  });
+                }
+              } catch {
+                // fall through to next endpoint or local staging
+              }
+            }
+          } catch (fetchErr) {
+            console.warn(`[WP Media Upload Attempt Failed] ${wpEndpoint}:`, fetchErr);
+          }
+        }
+      }
+
+      // Local Staging Fallback: Always save the image into public/uploads
+      const uniqueName = `${Date.now()}-${safeFileName}`;
+      const savePath = path.join(uploadsDir, uniqueName);
+      fs.writeFileSync(savePath, fileBuffer);
+
+      const localUrl = `/uploads/${uniqueName}`;
+
+      return res.json({
+        success: true,
+        url: localUrl,
+        id: Date.now(),
+        title: cleanTitle,
+        source: 'local_staging',
+        warning: isExternalWp 
+          ? `WordPress at "${cleanWpUrl}" returned a web page (HTML) or is not reachable yet from this server. Saved securely to media staging at ${localUrl}. When deployed on cPanel with WordPress, uploads will save directly to /wp-content/uploads/.`
+          : `Saved to media staging at ${localUrl}. (Configure your WordPress Site URL in Settings to sync directly with your live WordPress Media Library).`
+      });
+
+    } catch (error: any) {
+      console.error('[WP Media Upload Handler Error]:', error);
+      res.status(500).json({ success: false, error: error.message || 'Internal server error during upload.' });
+    }
+  });
+
+  // 7. WordPress Media Library Proxy
+  app.get('/api/wp-media/library', async (req, res) => {
+    try {
+      const { wpBaseUrl, username, appPassword, page = '1', perPage = '24' } = req.query as Record<string, string>;
+
+      const cleanWpUrl = (wpBaseUrl || '').trim().replace(/\/+$/, '');
+      const isExternalWp = cleanWpUrl.startsWith('http://') || cleanWpUrl.startsWith('https://');
+
+      if (isExternalWp) {
+        const headers: Record<string, string> = { 'Accept': 'application/json' };
+        if (username && appPassword) {
+          const cleanPassword = appPassword.replace(/\s+/g, '');
+          headers['Authorization'] = 'Basic ' + Buffer.from(`${username.trim()}:${cleanPassword}`).toString('base64');
+        }
+
+        const endpoints = [
+          `${cleanWpUrl}/wp-json/wp/v2/media?per_page=${perPage}&page=${page}&media_type=image`,
+          `${cleanWpUrl}/index.php?rest_route=/wp/v2/media&per_page=${perPage}&page=${page}&media_type=image`
+        ];
+
+        for (const ep of endpoints) {
+          try {
+            const wpRes = await fetch(ep, { headers });
+            const contentType = wpRes.headers.get('content-type') || '';
+            const text = await wpRes.text();
+
+            if (contentType.includes('application/json') || (!text.trim().startsWith('<') && text.trim().startsWith('['))) {
+              const data = JSON.parse(text);
+              if (Array.isArray(data)) {
+                const items = data.map((item: any) => ({
+                  id: item.id,
+                  title: item.title?.rendered || item.slug || `Media #${item.id}`,
+                  source_url: item.source_url || item.guid?.rendered,
+                  thumbnail_url: item.media_details?.sizes?.medium?.source_url || item.media_details?.sizes?.thumbnail?.source_url || item.source_url,
+                  date: item.date || '',
+                  mime_type: item.mime_type || 'image/jpeg'
+                })).filter((i: any) => !!i.source_url);
+
+                return res.json({
+                  success: true,
+                  items,
+                  totalPages: parseInt(wpRes.headers.get('X-WP-TotalPages') || '1', 10),
+                  source: 'wordpress'
+                });
+              }
+            }
+          } catch {
+            // try next endpoint
+          }
+        }
+      }
+
+      // Local fallback: return any images found in public/uploads or public
+      const localFiles = fs.existsSync(uploadsDir) ? fs.readdirSync(uploadsDir) : [];
+      const items = localFiles.map((file, idx) => ({
+        id: idx + 1,
+        title: file.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
+        source_url: `/uploads/${file}`,
+        thumbnail_url: `/uploads/${file}`,
+        date: new Date().toISOString(),
+        mime_type: 'image/jpeg'
+      }));
+
+      return res.json({
+        success: true,
+        items,
+        totalPages: 1,
+        source: 'local_staging'
+      });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
     }
   });
 

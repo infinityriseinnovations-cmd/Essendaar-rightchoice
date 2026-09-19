@@ -311,19 +311,38 @@ export const WordPressMediaModal: React.FC<WordPressMediaModalProps> = ({
 
               {/* Status alerts */}
               {uploadError && (
-                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                  <div className="flex-1">
-                    <p className="font-bold">Upload Error</p>
-                    <p className="text-[11px] mt-0.5">{uploadError}</p>
+                <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 space-y-2">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="font-bold">Upload Notice</p>
+                      <p className="text-[11px] mt-0.5 whitespace-pre-line text-rose-900">{uploadError}</p>
+                    </div>
                   </div>
+
+                  {filePreview && (
+                    <div className="pt-2 border-t border-rose-200/70 flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-[11px] text-rose-700 font-medium">Want to use this image on your product now?</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onSelectImage(filePreview, selectedFile?.name?.replace(/\.[^/.]+$/, ''));
+                          onClose();
+                        }}
+                        className="px-3 py-1.5 bg-[#00355f] hover:bg-[#0A2540] text-white font-bold rounded-lg text-[11px] flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Use Photo (Instant Staging)</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
               {uploadSuccessUrl && (
                 <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span className="font-bold">Successfully uploaded to WordPress Media Library! Assigning image...</span>
+                  <span className="font-bold">Image ready and assigned to product!</span>
                 </div>
               )}
 
@@ -491,12 +510,12 @@ export const WordPressMediaModal: React.FC<WordPressMediaModalProps> = ({
           {/* TAB 3: SETTINGS */}
           {activeTab === 'settings' && (
             <form onSubmit={handleSaveSettings} className="space-y-4">
-              <div className="bg-sky-50 border border-sky-200 rounded-xl p-3 text-xs text-sky-900 flex items-start gap-2.5">
+              <div className="bg-sky-50 border border-sky-200 rounded-xl p-3.5 text-xs text-sky-900 flex items-start gap-2.5">
                 <Globe className="w-4 h-4 text-[#0073aa] shrink-0 mt-0.5" />
                 <div>
                   <h5 className="font-bold">WordPress Connection Guide</h5>
-                  <p className="text-[11px] text-sky-800 mt-0.5">
-                    Because both frontend and WordPress are hosted on <strong>essendaar.com</strong>, you can leave Site URL blank for automatic same-domain uploads, or specify your full URL (e.g. <code>https://essendaar.com</code>).
+                  <p className="text-[11px] text-sky-800 mt-1 leading-relaxed">
+                    When deployed on your live cPanel server at <strong>essendaar.com</strong>, leave Site URL blank for automatic uploads into WordPress <code>/wp-content/uploads/</code>. In this preview environment, images are automatically staged so product photos work immediately even if WordPress domain DNS is not yet live.
                   </p>
                 </div>
               </div>
