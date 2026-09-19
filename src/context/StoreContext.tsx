@@ -635,18 +635,26 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return initialCustomersSeed;
   });
 
-  // Current Logged-in Customer User State
+  // Current Logged-in Customer User State (strictly null by default until customer logs in)
   const [currentUser, setCurrentUser] = useState<CustomerUser | null>(() => {
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem('essendaar_current_user');
-        if (saved) return JSON.parse(saved);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          // If it was the old auto-seeded default user, remove it so clean visitors are not auto logged-in
+          if (parsed && typeof parsed.id === 'string' && parsed.id.startsWith('cust-seed-')) {
+            localStorage.removeItem('essendaar_current_user');
+            return null;
+          }
+          return parsed;
+        }
       } catch (e) {
         console.error('Error loading current user', e);
       }
     }
-    // Default to first customer (Siva Kumar) if not explicitly logged out, or null
-    return initialCustomersSeed[0] || null;
+    // Default to null - customer must explicitly log in via Account button
+    return null;
   });
 
   // Auth Modal State
