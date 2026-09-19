@@ -73,7 +73,7 @@ interface StoreContextType {
   refreshWooCommerceProducts: () => Promise<void>;
 
   // Customer Auth Actions
-  openAuthModal: (tab?: 'login' | 'register' | 'admin') => void;
+  openAuthModal: (tab?: 'login' | 'register' | 'admin' | string) => void;
   closeAuthModal: () => void;
   sendEmailOtp: (email: string) => { otp: string; message: string };
   verifyEmailOtp: (email: string, otp: string) => { success: boolean; message: string };
@@ -1076,8 +1076,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   // CUSTOMER AUTH ACTIONS
-  const openAuthModal = (tab: 'login' | 'register' | 'admin' = 'login') => {
-    setAuthModalTab(tab);
+  const openAuthModal = (tab: 'login' | 'register' | 'admin' | string = 'login') => {
+    const normalizedTab: 'login' | 'register' | 'admin' =
+      tab === 'register' ? 'register' :
+      tab === 'admin' ? 'admin' : 'login';
+    setAuthModalTab(normalizedTab);
     setIsAuthModalOpen(true);
   };
 

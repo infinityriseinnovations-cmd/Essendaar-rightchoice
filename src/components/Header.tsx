@@ -103,7 +103,7 @@ export const Header: React.FC = () => {
               </button>
             ) : (
               <button
-                onClick={() => openAuthModal('customer-login')}
+                onClick={() => openAuthModal('login')}
                 className="hidden sm:flex items-center gap-1.5 text-xs text-[#42474f] hover:text-[#00355f] font-semibold transition-colors cursor-pointer"
               >
                 <User className="w-4 h-4" />
@@ -213,7 +213,7 @@ export const Header: React.FC = () => {
               ) : (
                 <button
                   onClick={() => {
-                    openAuthModal('customer-login');
+                    openAuthModal('login');
                     setMobileMenuOpen(false);
                   }}
                   className="text-left px-3 py-2.5 rounded-lg bg-sky-50 text-[#00355f] font-bold border border-sky-200 flex items-center justify-between"

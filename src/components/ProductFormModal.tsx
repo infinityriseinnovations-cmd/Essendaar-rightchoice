@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Product, ProductVariant } from '../types';
+import { WordPressMediaModal } from './WordPressMediaModal';
 import { 
   X, 
   Upload, 
@@ -38,10 +39,12 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   initialProduct,
   mode
 }) => {
-  if (!isOpen) return null;
-
   // Active section tab inside modal
   const [modalTab, setModalTab] = useState<'images' | 'general' | 'pricing' | 'trust' | 'details'>('images');
+
+  // WordPress Media Library Modal state
+  const [isWpMediaOpen, setIsWpMediaOpen] = useState(false);
+  const [wpTarget, setWpTarget] = useState<'main' | 'gallery'>('main');
 
   // New gallery image input state
   const [newGalleryUrl, setNewGalleryUrl] = useState('');
@@ -116,6 +119,28 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
     return defaultProduct;
   });
 
+  useEffect(() => {
+    if (isOpen) {
+      if (initialProduct) {
+        setFormData({
+          ...defaultProduct,
+          ...initialProduct,
+          variants: initialProduct.variants && initialProduct.variants.length > 0 
+            ? initialProduct.variants 
+            : [
+                { size: initialProduct.packSize || '1 Litre', price: initialProduct.price, mrp: initialProduct.regularPrice, sku: initialProduct.sku }
+              ],
+          gallery: initialProduct.gallery && initialProduct.gallery.length > 0
+            ? initialProduct.gallery
+            : [initialProduct.image]
+        });
+      } else {
+        setFormData(defaultProduct);
+      }
+      setModalTab('images');
+    }
+  }, [isOpen, initialProduct]);
+
   // Handle local image file upload (converts to Base64 data URL)
   const handleMainImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -176,6 +201,21 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       ...prev,
       image: imgUrl
     }));
+  };
+
+  const handleSelectWordPressImage = (imageUrl: string) => {
+    if (wpTarget === 'main') {
+      setFormData((prev) => ({
+        ...prev,
+        image: imageUrl,
+        gallery: prev.gallery.includes(imageUrl) ? prev.gallery : [imageUrl, ...prev.gallery]
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        gallery: prev.gallery.includes(imageUrl) ? prev.gallery : [...prev.gallery, imageUrl]
+      }));
+    }
   };
 
   // Variants management
@@ -249,6 +289,8 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const discountPercent = formData.regularPrice > formData.price 
     ? Math.round(((formData.regularPrice - formData.price) / formData.regularPrice) * 100) 
     : 0;
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
@@ -362,18 +404,50 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   {/* Image Controls: Upload & URL */}
                   <div className="sm:col-span-8 space-y-3">
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Upload Image from Computer / Device</label>
-                      <label className="flex items-center justify-center gap-2 px-4 py-3 bg-white hover:bg-slate-100 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer font-bold text-slate-700 transition-colors shadow-xs">
-                        <Upload className="w-4 h-4 text-[#00355f]" />
-                        <span>Choose Image File (JPG, PNG, WebP)</span>
-                        <input 
-                          type="file" 
-                          accept="image/*" 
-                          onChange={handleMainImageUpload} 
-                          className="hidden" 
-                        />
-                      </label>
-                      <p className="text-[10px] text-slate-400 mt-1">Converts automatically to fast instant data URL without external image hosting.</p>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="font-bold text-slate-700 text-xs sm:text-sm">Upload or Choose Image</label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setWpTarget('main');
+                            setIsWpMediaOpen(true);
+                          }}
+                          className="text-[11px] text-[#0073aa] hover:underline font-bold flex items-center gap-1 cursor-pointer"
+                        >
+                          <ImageIcon className="w-3 h-3" />
+                          <span>Browse WP Media Library</span>
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setWpTarget('main');
+                            setIsWpMediaOpen(true);
+                          }}
+                          className="flex items-center justify-center gap-2 px-4 py-3 bg-[#0073aa] hover:bg-[#005177] text-white rounded-xl font-bold text-xs shadow-xs transition-colors cursor-pointer"
+                        >
+                          <div className="w-4 h-4 rounded-full bg-white text-[#0073aa] font-serif font-bold text-[10px] flex items-center justify-center leading-none">
+                            W
+                          </div>
+                          <span>Upload to WordPress Media</span>
+                        </button>
+
+                        <label className="flex items-center justify-center gap-2 px-4 py-3 bg-white hover:bg-slate-100 border border-slate-300 rounded-xl cursor-pointer font-bold text-slate-700 text-xs transition-colors shadow-xs">
+                          <Upload className="w-4 h-4 text-slate-600" />
+                          <span>Upload from Computer</span>
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            onChange={handleMainImageUpload} 
+                            className="hidden" 
+                          />
+                        </label>
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-1.5">
+                        Saves directly to <code>/wp-content/uploads/</code> on essendaar.com or converts local files.
+                      </p>
                     </div>
 
                     <div>
@@ -473,10 +547,24 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                     </button>
                   </div>
 
-                  <div className="shrink-0 w-full sm:w-auto">
-                    <label className="flex items-center justify-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl cursor-pointer font-bold text-slate-700 shadow-xs">
-                      <Upload className="w-3.5 h-3.5 text-[#00355f]" />
-                      <span>Upload Gallery Photo</span>
+                  <div className="shrink-0 w-full sm:w-auto flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setWpTarget('gallery');
+                        setIsWpMediaOpen(true);
+                      }}
+                      className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-[#0073aa] hover:bg-[#005177] text-white rounded-xl font-bold text-xs shadow-xs transition-colors cursor-pointer"
+                    >
+                      <div className="w-3.5 h-3.5 rounded-full bg-white text-[#0073aa] font-serif font-bold text-[9px] flex items-center justify-center leading-none">
+                        W
+                      </div>
+                      <span>Upload to WP Media</span>
+                    </button>
+
+                    <label className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl cursor-pointer font-bold text-slate-700 text-xs shadow-xs">
+                      <Upload className="w-3.5 h-3.5 text-slate-600" />
+                      <span>Upload Local</span>
                       <input 
                         type="file" 
                         accept="image/*" 
@@ -1064,6 +1152,16 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             </button>
           </div>
         </div>
+
+        {/* WordPress Media Library Upload & Picker Modal */}
+        {isWpMediaOpen && (
+          <WordPressMediaModal
+            isOpen={true}
+            onClose={() => setIsWpMediaOpen(false)}
+            onSelectImage={handleSelectWordPressImage}
+            targetLabel={wpTarget === 'main' ? 'Primary Product Image' : 'Gallery Photo'}
+          />
+        )}
 
       </div>
     </div>

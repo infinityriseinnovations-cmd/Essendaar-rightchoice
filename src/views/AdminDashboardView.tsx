@@ -1624,27 +1624,31 @@ export const AdminDashboardView: React.FC = () => {
       </div>
 
       {/* MODAL 1: ADD PRODUCT */}
-      <ProductFormModal
-        isOpen={isAddingProduct}
-        onClose={() => setIsAddingProduct(false)}
-        mode="add"
-        onSave={(newProd) => {
-          addProduct(newProd);
-          showToast(`✓ Added "${newProd.name}" to live catalog!`);
-        }}
-      />
+      {isAddingProduct && (
+        <ProductFormModal
+          isOpen={true}
+          onClose={() => setIsAddingProduct(false)}
+          mode="add"
+          onSave={(newProd) => {
+            addProduct(newProd);
+            showToast(`✓ Added "${newProd.name}" to live catalog!`);
+          }}
+        />
+      )}
 
       {/* MODAL 2: EDIT PRODUCT */}
-      <ProductFormModal
-        isOpen={!!editingProduct}
-        onClose={() => setEditingProduct(null)}
-        mode="edit"
-        initialProduct={editingProduct}
-        onSave={(updatedProd) => {
-          updateProduct(updatedProd);
-          showToast(`✓ Updated "${updatedProd.name}" successfully!`);
-        }}
-      />
+      {editingProduct && (
+        <ProductFormModal
+          isOpen={true}
+          onClose={() => setEditingProduct(null)}
+          mode="edit"
+          initialProduct={editingProduct}
+          onSave={(updatedProd) => {
+            updateProduct(updatedProd);
+            showToast(`✓ Updated "${updatedProd.name}" successfully!`);
+          }}
+        />
+      )}
 
       {/* MODAL 3: GST TAX INVOICE PRINT VIEW */}
       {selectedInvoiceOrder && (

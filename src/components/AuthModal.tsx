@@ -31,7 +31,13 @@ export const AuthModal: React.FC = () => {
     setCurrentRoute
   } = useStore();
 
-  const [activeTab, setActiveTab] = useState<'login' | 'register' | 'admin'>(authModalTab);
+  const normalizeTab = (tab: any): 'login' | 'register' | 'admin' => {
+    if (tab === 'register') return 'register';
+    if (tab === 'admin') return 'admin';
+    return 'login';
+  };
+
+  const [activeTab, setActiveTab] = useState<'login' | 'register' | 'admin'>(() => normalizeTab(authModalTab));
   
   // Login states
   const [loginIdentifier, setLoginIdentifier] = useState('');
@@ -64,7 +70,7 @@ export const AuthModal: React.FC = () => {
   const otpInputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
-    setActiveTab(authModalTab);
+    setActiveTab(normalizeTab(authModalTab));
     setLoginError(null);
     setLoginSuccess(null);
     setRegError(null);
