@@ -1367,6 +1367,104 @@ export const AdminDashboardView: React.FC = () => {
         {activeTab === 'settings' && (
           <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in">
             
+            {/* Brand Identity & High-Resolution Logo Downloads */}
+            <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-slate-200">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-[#eff4ff] text-[#00355f] flex items-center justify-center border border-sky-100 shrink-0">
+                    <img src="/favicon-32x32.png" alt="Favicon" className="w-6 h-6 object-contain" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-black tracking-tight text-slate-900">Official Brand Assets &amp; Logo Downloads</h2>
+                    <p className="text-xs text-slate-500">Master high-resolution PNG (2460 × 600 px), emblem vector icons &amp; browser favicon</p>
+                  </div>
+                </div>
+                <span className="bg-sky-50 text-sky-700 border border-sky-200 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider self-start sm:self-auto">
+                  High-DPI Ready
+                </span>
+              </div>
+
+              {/* Logo Preview Banner */}
+              <div className="p-6 rounded-2xl bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:12px_12px] bg-slate-50 border border-slate-200 flex items-center justify-center mb-6">
+                <img 
+                  src="/essendaar-logo-large.png" 
+                  alt="Essendaar Suppliers & Facility Care Logo" 
+                  className="max-h-16 w-auto object-contain drop-shadow-xs"
+                />
+              </div>
+
+              {/* Download Buttons Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <a
+                  href="/essendaar-logo-large.png"
+                  download="essendaar-logo-large-transparent.png"
+                  className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 hover:border-[#00355f] hover:bg-sky-50/50 transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-[#00355f] group-hover:bg-[#00355f] group-hover:text-white transition-colors">
+                      <Download className="w-4 h-4" />
+                    </div>
+                    <div className="text-left">
+                      <div className="text-xs font-bold text-slate-900">Large Logo (Transparent)</div>
+                      <div className="text-[10px] font-mono text-slate-500">2460 × 600 px • PNG (~62 KB)</div>
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-bold text-[#00355f] group-hover:underline">Download</span>
+                </a>
+
+                <a
+                  href="/essendaar-logo-large-white-bg.png"
+                  download="essendaar-logo-large-white.png"
+                  className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 hover:border-[#00355f] hover:bg-sky-50/50 transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-[#00355f] group-hover:bg-[#00355f] group-hover:text-white transition-colors">
+                      <Download className="w-4 h-4" />
+                    </div>
+                    <div className="text-left">
+                      <div className="text-xs font-bold text-slate-900">Large Logo (White BG)</div>
+                      <div className="text-[10px] font-mono text-slate-500">2460 × 600 px • PNG (~66 KB)</div>
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-bold text-[#00355f] group-hover:underline">Download</span>
+                </a>
+
+                <a
+                  href="/essendaar-emblem-large.png"
+                  download="essendaar-emblem-1024x1024.png"
+                  className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 hover:border-[#00355f] hover:bg-sky-50/50 transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-[#00355f] group-hover:bg-[#00355f] group-hover:text-white transition-colors">
+                      <Download className="w-4 h-4" />
+                    </div>
+                    <div className="text-left">
+                      <div className="text-xs font-bold text-slate-900">Square Emblem Icon</div>
+                      <div className="text-[10px] font-mono text-slate-500">1024 × 1024 px • PNG (~53 KB)</div>
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-bold text-[#00355f] group-hover:underline">Download</span>
+                </a>
+
+                <a
+                  href="/favicon.ico"
+                  download="favicon.ico"
+                  className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 hover:border-[#00355f] hover:bg-sky-50/50 transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-[#00355f] group-hover:bg-[#00355f] group-hover:text-white transition-colors">
+                      <Download className="w-4 h-4" />
+                    </div>
+                    <div className="text-left">
+                      <div className="text-xs font-bold text-slate-900">Browser Favicon Suite</div>
+                      <div className="text-[10px] font-mono text-slate-500">Multi-res ICO (16/32/48px)</div>
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-bold text-[#00355f] group-hover:underline">Download</span>
+                </a>
+              </div>
+            </div>
+
             {/* SMTP Mail Server Configuration Panel */}
             <div className="bg-[#00355f] text-white rounded-3xl p-8 shadow-md border border-sky-900">
               <div className="flex items-center justify-between gap-4 mb-4">

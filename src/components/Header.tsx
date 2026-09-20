@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 import { EssendaarLogo } from './EssendaarLogo';
+import { BrandAssetsModal } from './BrandAssetsModal';
 import { 
   Search, 
   User, 
   Heart, 
   ShoppingBag, 
   Menu, 
-  X
+  X,
+  Download
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -26,6 +28,7 @@ export const Header: React.FC = () => {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
+  const [brandModalOpen, setBrandModalOpen] = useState(false);
 
   const navLinks = [
     { label: 'Home', route: 'home' as const },
@@ -44,13 +47,25 @@ export const Header: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
         <div className="flex items-center justify-between gap-4">
           
-          {/* Logo */}
-          <button
-            onClick={() => setCurrentRoute('home')}
-            className="flex items-center cursor-pointer text-left focus:outline-none"
-          >
-            <EssendaarLogo />
-          </button>
+          {/* Logo & Download Badge */}
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => setCurrentRoute('home')}
+              className="flex items-center cursor-pointer text-left focus:outline-none"
+              title="Essendaar Suppliers & Facility Care"
+            >
+              <EssendaarLogo />
+            </button>
+            <button
+              type="button"
+              onClick={() => setBrandModalOpen(true)}
+              className="hidden lg:inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-slate-600 hover:text-[#00355f] bg-slate-100 hover:bg-sky-50 rounded-lg transition-colors border border-slate-200/80 cursor-pointer shadow-2xs"
+              title="Download High-Resolution Logo (PNG) & Favicons"
+            >
+              <Download className="w-3 h-3 text-sky-600" />
+              <span>Logo PNG</span>
+            </button>
+          </div>
 
           {/* Desktop Search with Categories dropdown */}
           <div className="hidden md:flex flex-1 max-w-xl mx-4 items-center">
@@ -254,6 +269,12 @@ export const Header: React.FC = () => {
         )}
 
       </div>
+
+      {/* Brand Assets & Logo Download Modal */}
+      <BrandAssetsModal 
+        isOpen={brandModalOpen} 
+        onClose={() => setBrandModalOpen(false)} 
+      />
     </header>
   );
 };

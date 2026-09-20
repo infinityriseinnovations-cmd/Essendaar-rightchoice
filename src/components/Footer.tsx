@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 import { EssendaarLogo } from './EssendaarLogo';
+import { BrandAssetsModal } from './BrandAssetsModal';
 import { 
   Phone, 
   Mail, 
@@ -9,10 +10,12 @@ import {
   FlaskConical, 
   ArrowRight,
   Heart,
-  Clock
+  Clock,
+  Download
 } from 'lucide-react';
 
 export const Footer: React.FC = () => {
+  const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
   const { 
     setCurrentRoute, 
     settings, 
@@ -97,6 +100,16 @@ export const Footer: React.FC = () => {
               <span>Tamilnadu Test House Tested</span>
               <span>·</span>
               <span>MSME Registered</span>
+            </div>
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() => setIsBrandModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-sky-200 hover:text-white border border-white/15 text-xs font-semibold transition-all cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5 text-sky-400" />
+                <span>Download Official Logo (Large PNG) &amp; Favicon</span>
+              </button>
             </div>
           </div>
 
@@ -278,10 +291,22 @@ export const Footer: React.FC = () => {
             >
               Return Policy
             </button>
+            <span>·</span>
+            <button
+              type="button"
+              onClick={() => setIsBrandModalOpen(true)}
+              className="text-sky-300 hover:text-white underline cursor-pointer transition-colors"
+            >
+              Logo Downloads (PNG)
+            </button>
           </div>
         </div>
       </div>
 
+      <BrandAssetsModal 
+        isOpen={isBrandModalOpen} 
+        onClose={() => setIsBrandModalOpen(false)} 
+      />
     </footer>
   );
 };
