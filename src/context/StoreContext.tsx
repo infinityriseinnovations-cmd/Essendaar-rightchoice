@@ -489,40 +489,65 @@ const parseRouteFromUrl = (productsList: Product[]) => {
     return { route: 'home' as AppRoute, product: productsList[0] || null, slug: null };
   }
 
-  const path = window.location.pathname.toLowerCase().replace(/\/+$/, '') || '/';
+  const rawPath = (window.location.pathname || '').toLowerCase();
+  const rawSearch = (window.location.search || '').toLowerCase();
+  const rawHash = (window.location.hash || '').toLowerCase();
+  const fullUrl = `${rawPath} ${rawSearch} ${rawHash}`;
+
+  // Check explicit query parameter overrides like ?route=home-care-cleaning or ?page=home-care-cleaning
+  const params = new URLSearchParams(window.location.search);
+  const routeParam = (params.get('route') || params.get('page') || params.get('view') || '').toLowerCase();
+
+  if (routeParam) {
+    if (routeParam.includes('home-care') || routeParam.includes('homecare') || routeParam.includes('right-choice') || routeParam.includes('rightchoice')) {
+      return { route: 'home-care-cleaning' as AppRoute, product: null, slug: null };
+    }
+    if (routeParam.includes('facility')) return { route: 'facility-management' as AppRoute, product: null, slug: null };
+    if (routeParam.includes('manpower')) return { route: 'manpower-support' as AppRoute, product: null, slug: null };
+    if (routeParam.includes('institutional') || routeParam.includes('supplies')) return { route: 'institutional-supplies' as AppRoute, product: null, slug: null };
+    if (routeParam.includes('about')) return { route: 'about-us' as AppRoute, product: null, slug: null };
+    if (routeParam.includes('contact')) return { route: 'contact' as AppRoute, product: null, slug: null };
+    if (routeParam.includes('shop') || routeParam.includes('catalog')) return { route: 'shop' as AppRoute, product: null, slug: null };
+    if (routeParam.includes('admin') || routeParam.includes('dashboard')) return { route: 'admin' as AppRoute, product: null, slug: null };
+    if (routeParam.includes('account') || routeParam.includes('customer')) return { route: 'customer-dashboard' as AppRoute, product: null, slug: null };
+  }
+
+  const path = rawPath.replace(/\/+$/, '') || '/';
+
+  // Route matching from pathname
+  if (fullUrl.includes('home-care-cleaning') || fullUrl.includes('home-care') || fullUrl.includes('homecare') || fullUrl.includes('home_care') || fullUrl.includes('right-choice') || fullUrl.includes('rightchoice') || fullUrl.includes('right_choice')) {
+    return { route: 'home-care-cleaning' as AppRoute, product: null, slug: null };
+  }
+  if (fullUrl.includes('/admin') || fullUrl.includes('/dashboard') || fullUrl.includes('/backend')) {
+    return { route: 'admin' as AppRoute, product: null, slug: null };
+  }
+  if (fullUrl.includes('/shop')) {
+    return { route: 'shop' as AppRoute, product: null, slug: null };
+  }
+  if (fullUrl.includes('/checkout')) {
+    return { route: 'checkout' as AppRoute, product: null, slug: null };
+  }
+  if (fullUrl.includes('/contact')) {
+    return { route: 'contact' as AppRoute, product: null, slug: null };
+  }
+  if (fullUrl.includes('/about')) {
+    return { route: 'about-us' as AppRoute, product: null, slug: null };
+  }
+  if (fullUrl.includes('/facility-management') || fullUrl.includes('facility_management')) {
+    return { route: 'facility-management' as AppRoute, product: null, slug: null };
+  }
+  if (fullUrl.includes('/manpower-support') || fullUrl.includes('manpower_support') || fullUrl.includes('manpower')) {
+    return { route: 'manpower-support' as AppRoute, product: null, slug: null };
+  }
+  if (fullUrl.includes('/institutional-supplies') || fullUrl.includes('institutional_supplies') || fullUrl.includes('institutional')) {
+    return { route: 'institutional-supplies' as AppRoute, product: null, slug: null };
+  }
+  if (fullUrl.includes('/account') || fullUrl.includes('/my-account') || fullUrl.includes('/customer-dashboard') || fullUrl.includes('/customer')) {
+    return { route: 'customer-dashboard' as AppRoute, product: null, slug: null };
+  }
 
   if (path === '' || path === '/') {
     return { route: 'home' as AppRoute, product: productsList[0] || null, slug: null };
-  }
-  if (path.includes('/admin') || path.includes('/dashboard') || path.includes('/backend')) {
-    return { route: 'admin' as AppRoute, product: null, slug: null };
-  }
-  if (path.includes('/shop')) {
-    return { route: 'shop' as AppRoute, product: null, slug: null };
-  }
-  if (path.includes('/checkout')) {
-    return { route: 'checkout' as AppRoute, product: null, slug: null };
-  }
-  if (path.includes('/contact')) {
-    return { route: 'contact' as AppRoute, product: null, slug: null };
-  }
-  if (path.includes('/about')) {
-    return { route: 'about-us' as AppRoute, product: null, slug: null };
-  }
-  if (path.includes('/home-care-cleaning') || path.includes('/home-care') || path.includes('/homecare') || path.includes('/right-choice') || path.includes('/rightchoice')) {
-    return { route: 'home-care-cleaning' as AppRoute, product: null, slug: null };
-  }
-  if (path.includes('/facility-management')) {
-    return { route: 'facility-management' as AppRoute, product: null, slug: null };
-  }
-  if (path.includes('/manpower-support')) {
-    return { route: 'manpower-support' as AppRoute, product: null, slug: null };
-  }
-  if (path.includes('/institutional-supplies')) {
-    return { route: 'institutional-supplies' as AppRoute, product: null, slug: null };
-  }
-  if (path.includes('/account') || path.includes('/my-account') || path.includes('/customer-dashboard') || path.includes('/customer')) {
-    return { route: 'customer-dashboard' as AppRoute, product: null, slug: null };
   }
 
   // Check product URL pattern: /product/:slug or /shop/:slug

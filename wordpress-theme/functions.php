@@ -155,6 +155,7 @@ function essendaar_default_navigation_menu() {
     echo '<ul class="flex flex-wrap items-center space-x-6 text-xs font-bold text-slate-700 font-headline">';
     echo '<li><a href="' . $home_url . '" class="hover:text-[#00355f] transition-colors">' . esc_html__('Home', 'essendaar') . '</a></li>';
     echo '<li><a href="' . $shop_url . '" class="hover:text-[#00355f] transition-colors">' . esc_html__('Shop / Products', 'essendaar') . '</a></li>';
+    echo '<li><a href="' . esc_url(home_url('/home-care-cleaning')) . '" class="hover:text-[#00355f] transition-colors">' . esc_html__('Home Care (Right Choice)', 'essendaar') . '</a></li>';
     echo '<li><a href="' . esc_url(home_url('/facility-management')) . '" class="hover:text-[#00355f] transition-colors">' . esc_html__('Facility Management', 'essendaar') . '</a></li>';
     echo '<li><a href="' . esc_url(home_url('/manpower-support')) . '" class="hover:text-[#00355f] transition-colors">' . esc_html__('Manpower Support', 'essendaar') . '</a></li>';
     echo '<li><a href="' . esc_url(home_url('/institutional-supplies')) . '" class="hover:text-[#00355f] transition-colors">' . esc_html__('Institutional Supplies', 'essendaar') . '</a></li>';
@@ -162,3 +163,35 @@ function essendaar_default_navigation_menu() {
     echo '<li><a href="' . esc_url(home_url('/contact')) . '" class="hover:text-[#00355f] transition-colors">' . esc_html__('Contact / B2B Quote', 'essendaar') . '</a></li>';
     echo '</ul>';
 }
+
+/**
+ * Automatic Custom Page Template Loader by Slug
+ */
+add_filter('template_include', function($template) {
+    if (is_page('home-care-cleaning') || is_page('home-care') || is_page('homecare') || is_page('right-choice')) {
+        $custom = locate_template('page-home-care-cleaning.php');
+        if ($custom) return $custom;
+    }
+    if (is_page('facility-management')) {
+        $custom = locate_template('page-facility-management.php');
+        if ($custom) return $custom;
+    }
+    if (is_page('manpower-support')) {
+        $custom = locate_template('page-manpower-support.php');
+        if ($custom) return $custom;
+    }
+    if (is_page('institutional-supplies')) {
+        $custom = locate_template('page-institutional-supplies.php');
+        if ($custom) return $custom;
+    }
+    if (is_page('about-us') || is_page('about')) {
+        $custom = locate_template('page-about-us.php');
+        if ($custom) return $custom;
+    }
+    if (is_page('contact') || is_page('contact-us')) {
+        $custom = locate_template('page-contact.php');
+        if ($custom) return $custom;
+    }
+    return $template;
+});
+
