@@ -229,9 +229,16 @@ export const AboutUsView: React.FC = () => {
                       alt="D Siva Krishnan, B.E - Founder & Managing Director, Essendaar Suppliers"
                       className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
                       onError={(e) => {
-                        // Fallback to public root if needed
-                        if (e.currentTarget.src !== window.location.origin + '/assets/siva-krishnan.jpg') {
-                          e.currentTarget.src = '/assets/siva-krishnan.jpg';
+                        const target = e.currentTarget;
+                        if (!target.dataset.tried1) {
+                          target.dataset.tried1 = 'true';
+                          target.src = '/siva-krishnan.jpg';
+                        } else if (!target.dataset.tried2) {
+                          target.dataset.tried2 = 'true';
+                          target.src = '/assets/siva-krishnan.jpg';
+                        } else if (!target.dataset.tried3) {
+                          target.dataset.tried3 = 'true';
+                          target.src = 'https://rightchoiceindia.com/wp-content/uploads/2026/09/siva-krishnan.jpg';
                         }
                       }}
                       referrerPolicy="no-referrer"
@@ -608,8 +615,16 @@ export const AboutUsView: React.FC = () => {
                     alt="D Siva Krishnan, B.E - Founder & Managing Director"
                     className="w-full h-full object-cover object-center"
                     onError={(e) => {
-                      if (e.currentTarget.src !== window.location.origin + '/assets/siva-krishnan.jpg') {
-                        e.currentTarget.src = '/assets/siva-krishnan.jpg';
+                      const target = e.currentTarget;
+                      if (!target.dataset.tried1) {
+                        target.dataset.tried1 = 'true';
+                        target.src = '/siva-krishnan.jpg';
+                      } else if (!target.dataset.tried2) {
+                        target.dataset.tried2 = 'true';
+                        target.src = '/assets/siva-krishnan.jpg';
+                      } else if (!target.dataset.tried3) {
+                        target.dataset.tried3 = 'true';
+                        target.src = 'https://rightchoiceindia.com/wp-content/uploads/2026/09/siva-krishnan.jpg';
                       }
                     }}
                     referrerPolicy="no-referrer"
