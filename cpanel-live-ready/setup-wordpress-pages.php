@@ -76,6 +76,12 @@ if (!current_user_can('manage_options') && !empty($_GET['run']) && $_GET['run'] 
                 'template' => 'page-institutional-supplies.php',
                 'content'  => 'Bulk Institutional Janitorial Supplies & Tools',
             ),
+            'home-care-cleaning' => array(
+                'title'    => 'Home Care Cleaning Products (Right Choice)',
+                'slug'     => 'home-care-cleaning',
+                'template' => 'page-home-care-cleaning.php',
+                'content'  => 'Right Choice Household Cleaning Products & Consumer Hygiene Formulations',
+            ),
             'contact' => array(
                 'title'    => 'Contact / B2B Quote',
                 'slug'     => 'contact',

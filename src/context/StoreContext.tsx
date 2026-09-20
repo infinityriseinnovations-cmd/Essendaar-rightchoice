@@ -509,6 +509,9 @@ const parseRouteFromUrl = (productsList: Product[]) => {
   if (path.includes('/about')) {
     return { route: 'about-us' as AppRoute, product: null, slug: null };
   }
+  if (path.includes('/home-care-cleaning') || path.includes('/home-care') || path.includes('/homecare') || path.includes('/right-choice') || path.includes('/rightchoice')) {
+    return { route: 'home-care-cleaning' as AppRoute, product: null, slug: null };
+  }
   if (path.includes('/facility-management')) {
     return { route: 'facility-management' as AppRoute, product: null, slug: null };
   }
@@ -875,6 +878,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           break;
         case 'institutional-supplies':
           path = '/institutional-supplies';
+          break;
+        case 'home-care-cleaning':
+          path = '/home-care-cleaning';
           break;
         case 'customer-dashboard':
           path = '/customer-dashboard';

@@ -927,18 +927,23 @@ export const HomeView: React.FC = () => {
               className="bg-white p-6 rounded-2xl shadow-xs border border-slate-200/80 flex flex-col justify-between hover:shadow-md transition-all cursor-pointer group"
             >
               <div>
-                <div className="w-12 h-12 rounded-xl bg-[#d2e4ff] text-[#00355f] flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                  <Sparkles className="w-6 h-6" />
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-[#d2e4ff] text-[#00355f] flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <Sparkles className="w-6 h-6" />
+                  </div>
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#006e2d] bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                    Right Choice™
+                  </span>
                 </div>
                 <h3 className="text-base font-headline font-bold text-[#0A2540] mb-2 group-hover:text-[#00355f] transition-colors">
                   Home Care Cleaning Products
                 </h3>
                 <p className="text-xs text-slate-600 mb-4 leading-relaxed">
-                  High-quality cleaning solutions for a cleaner and healthier home. Direct-to-consumer detergents, dishwash gels, and surface cleaners.
+                  High-quality cleaning solutions engineered under our Right Choice consumer brand. Consumer-pack detergents, dishwash gels, floor &amp; bathroom cleaners.
                 </p>
               </div>
               <div className="pt-3 border-t border-slate-100 text-xs font-bold text-[#00355f] flex items-center justify-between">
-                <span>View Products</span>
+                <span>Explore Right Choice</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>

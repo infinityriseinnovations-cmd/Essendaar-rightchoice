@@ -1462,6 +1462,26 @@ export const AdminDashboardView: React.FC = () => {
                   </div>
                   <span className="text-[11px] font-bold text-[#00355f] group-hover:underline">Download</span>
                 </a>
+
+                <a
+                  href="/right-choice-logo.png"
+                  download="right-choice-logo.png"
+                  className="flex items-center justify-between p-3.5 rounded-2xl border border-emerald-200 bg-emerald-50/30 hover:border-emerald-600 hover:bg-emerald-50 transition-all group sm:col-span-2"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-white border border-emerald-200 flex items-center justify-center text-[#006e2d] group-hover:bg-[#006e2d] group-hover:text-white transition-colors p-1">
+                      <img src="/right-choice-logo.png" alt="Right Choice" className="w-full h-full object-contain" />
+                    </div>
+                    <div className="text-left">
+                      <div className="text-xs font-bold text-slate-900 flex items-center gap-2">
+                        <span>Right Choice™ Consumer Entity Logo</span>
+                        <span className="text-[9px] bg-[#006e2d] text-white px-1.5 py-0.2 rounded font-bold uppercase">Home Care</span>
+                      </div>
+                      <div className="text-[10px] font-mono text-slate-500">565 × 657 px • Lossless PNG (~54 KB)</div>
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-bold text-[#006e2d] group-hover:underline">Download</span>
+                </a>
               </div>
             </div>
 

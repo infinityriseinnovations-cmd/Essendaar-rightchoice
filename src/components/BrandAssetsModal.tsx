@@ -58,6 +58,18 @@ export const BrandAssetsModal: React.FC<BrandAssetsModalProps> = ({ isOpen, onCl
       isSquare: true,
     },
     {
+      id: 'right-choice-logo',
+      title: 'Right Choice™ Official Entity Logo',
+      description: 'Official master logo for Right Choice — the domestic home care and cleaning consumer entity under Essendaar Suppliers.',
+      dimensions: '565 × 657 px',
+      fileFormat: 'PNG (Lossless RGBA)',
+      fileSize: '~54 KB',
+      filePath: '/right-choice-logo.png',
+      downloadName: 'right-choice-logo.png',
+      previewBg: 'bg-emerald-50/50 border border-emerald-100',
+      isSquare: false,
+    },
+    {
       id: 'favicon-ico',
       title: 'Browser Favicon Multi-Resolution (.ico & PNG)',
       description: 'Production multi-layer favicon (16px, 32px, 48px) and apple-touch-icon (180px) for browser tabs and mobile bookmarks.',

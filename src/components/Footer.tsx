@@ -176,6 +176,16 @@ export const Footer: React.FC = () => {
               <li>
                 <button 
                   type="button"
+                  onClick={() => handleRouteClick('home-care-cleaning')} 
+                  className="hover:text-emerald-300 transition-colors cursor-pointer text-left font-medium flex items-center gap-1.5"
+                >
+                  <span>Right Choice Home Care Products</span>
+                  <span className="text-[9px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded uppercase font-bold">Brand</span>
+                </button>
+              </li>
+              <li>
+                <button 
+                  type="button"
                   onClick={() => handleRouteClick('facility-management')} 
                   className="hover:text-white transition-colors cursor-pointer text-left"
                 >
